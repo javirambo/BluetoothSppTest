@@ -25,7 +25,7 @@ static const char *SPP_TAG = "BT_SPP";
 bool passwordIngresada = false;
 char myDeviceName[] = "EffiCast XXXXX";
 char appPassword[20];
-
+uint32_t tx_handle;
 BtStringCallback_t onEachLineCallback;
 BtStringCallback_t onDeviceAuthenticated;
 
@@ -58,10 +58,6 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 		break;
 	case ESP_SPP_OPEN_EVT:
 		ESP_LOGI(SPP_TAG, "ESP_SPP_OPEN_EVT");
-
-		uint8_t *c = (uint8_t*) "Hello";
-		esp_spp_write(param->srv_open.handle, 6, c);
-
 		break;
 
 	case ESP_SPP_CLOSE_EVT:
@@ -130,6 +126,8 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 	case ESP_SPP_SRV_OPEN_EVT:
 		// esto aparece al conectar la terminal bluetooth desde el celu:
 		ESP_LOGI(SPP_TAG, "ESP_SPP_SRV_OPEN_EVT");
+
+		tx_handle = param->srv_open.handle;
 
 		//********************************************
 		// PEDIR CONTRASEÑA
@@ -272,10 +270,11 @@ int bt_printf(const char *format, ...)
 	char buffer[256];
 	va_list args;
 	va_start(args, format);
-	int i = vsprintf(buffer, format, args);
+	int len = vsprintf(buffer, format, args);
 
-	// enviar el buffer
+	// enviar al canal de BT => Tx
+	esp_spp_write(tx_handle, len, (uint8_t*) buffer);
 
 	va_end(args);
-	return i;
+	return len;
 }
