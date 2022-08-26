@@ -30,7 +30,7 @@ void OnEachLine(char *line)
 
 	ESP_LOGI(SPP_TAG, "%s", line);
 
-	btspp_printf("test - %s - %d - %f\n\r", "OK", 3, 4.5);
+	bt_printf("test - %s - %d - %f\n\r", "OK", 3, 4.5);
 }
 
 void app_main(void)
@@ -39,5 +39,5 @@ void app_main(void)
 	// se llama al callback por cada linea que ingresa (terminada en \n\r).
 
 	// (password, callback)
-	btspp_init("Notengoidea", OnEachLine, CelularVinculado);
+	bt_init("Notengoidea", OnEachLine, CelularVinculado);
 }

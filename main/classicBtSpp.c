@@ -216,7 +216,7 @@ void esp_bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 	}
 }
 
-void btspp_init(const char *password, BtStringCallback_t onLineCallback, BtStringCallback_t onDeviceAuth)
+void bt_init(const char *password, BtStringCallback_t onLineCallback, BtStringCallback_t onDeviceAuth)
 {
 	onEachLineCallback = onLineCallback;
 	onDeviceAuthenticated = onDeviceAuth;
@@ -267,7 +267,7 @@ void btspp_init(const char *password, BtStringCallback_t onLineCallback, BtStrin
 }
 
 // envia string al canal serie
-int btspp_printf(const char *format, ...)
+int bt_printf(const char *format, ...)
 {
 	char buffer[256];
 	va_list args;

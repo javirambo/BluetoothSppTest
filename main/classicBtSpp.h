@@ -10,7 +10,7 @@
 
 typedef void (*BtStringCallback_t)(char *line);
 
-void btspp_init(const char * password, BtStringCallback_t onLineCallback, BtStringCallback_t onDeviceAuth);
-int btspp_printf(const char *format, ...);
+void bt_init(const char * password, BtStringCallback_t onLineCallback, BtStringCallback_t onDeviceAuth);
+int bt_printf(const char *format, ...);
 
 #endif /* MAIN_CLASSICBTSPP_H_ */
