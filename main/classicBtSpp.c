@@ -23,10 +23,11 @@
 static const char *SPP_TAG = "BT_SPP";
 
 bool passwordIngresada = false;
-esp_bd_addr_t remoteDeviceAddress;
 char myDeviceName[] = "EffiCast XXXXX";
+char appPassword[20];
 
-onEachLineCallback_t onEachLineCallback = NULL;
+BtStringCallback_t onEachLineCallback;
+BtStringCallback_t onDeviceAuthenticated;
 
 static void GetDeviceName()
 {
@@ -78,9 +79,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 		ESP_LOGI(SPP_TAG, "ESP_SPP_CL_INIT_EVT");
 		break;
 
-	case ESP_SPP_DATA_IND_EVT: {
-		char texto[128];
-		int texlen;
+	case ESP_SPP_DATA_IND_EVT:
 
 		// aca aparecen los datos que transmite el celu por bluetooth:
 
@@ -102,7 +101,9 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 
 		if (!passwordIngresada)
 		{
-			if (strcmp((char*) param->data_ind.data, BT_PASSWORD) == 0)
+			char texto[50];
+			int texlen;
+			if (strcmp((char*) param->data_ind.data, appPassword) == 0)
 			{
 				passwordIngresada = true;
 				ESP_LOGW(SPP_TAG, "PASSWORD CORRECTA");
@@ -115,13 +116,9 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 			esp_spp_write(param->srv_open.handle, texlen, (uint8_t*) texto);
 		} else
 		{
-			// hacer algo con los datos.......parse de JSON o comandos AT
-			if (onEachLineCallback)
-				onEachLineCallback((char*) param->data_ind.data);
+			onEachLineCallback((char*) param->data_ind.data);
 		}
-
 		break;
-	}
 
 	case ESP_SPP_CONG_EVT:
 		ESP_LOGI(SPP_TAG, "ESP_SPP_CONG_EVT");
@@ -158,25 +155,13 @@ void esp_bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 {
 	switch (event) {
 	case ESP_BT_GAP_AUTH_CMPL_EVT: {
+
+		// aca llega cuando se vincula un celular:
+
 		if (param->auth_cmpl.stat == ESP_BT_STATUS_SUCCESS)
-		{
-			// aca se muestra el nombre del celular vinculado:
-
-			ESP_LOGI(SPP_TAG, "authentication success: %s", param->auth_cmpl.device_name);
-
-			// remote bluetooth device address:
-			esp_log_buffer_hex(SPP_TAG, param->auth_cmpl.bda, ESP_BD_ADDR_LEN);
-
-			// *******************************************************
-			// LOGUEAR QUIEN SE VINCULO, SE PUEDE ENVIAR AL DASHBOARD
-			// *******************************************************
-			// guardo la mac del celu
-			memcpy(remoteDeviceAddress, param->auth_cmpl.bda, ESP_BD_ADDR_LEN);
-
-		} else
-		{
+			onDeviceAuthenticated((char*) param->auth_cmpl.device_name);
+		else
 			ESP_LOGE(SPP_TAG, "authentication failed, status:%d", param->auth_cmpl.stat);
-		}
 		break;
 	}
 	case ESP_BT_GAP_PIN_REQ_EVT: {
@@ -231,9 +216,11 @@ void esp_bt_gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 	}
 }
 
-void startClassicBtSpp(onEachLineCallback_t onLineCallback)
+void btspp_init(const char *password, BtStringCallback_t onLineCallback, BtStringCallback_t onDeviceAuth)
 {
 	onEachLineCallback = onLineCallback;
+	onDeviceAuthenticated = onDeviceAuth;
+	strcpy(appPassword, password);
 
 	esp_err_t ret = nvs_flash_init();
 	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
@@ -277,4 +264,18 @@ void startClassicBtSpp(onEachLineCallback_t onLineCallback)
 	 */
 	esp_bt_pin_code_t pin_code;
 	esp_bt_gap_set_pin(ESP_BT_PIN_TYPE_VARIABLE, 0, pin_code);
+}
+
+// envia string al canal serie
+int btspp_printf(const char *format, ...)
+{
+	char buffer[256];
+	va_list args;
+	va_start(args, format);
+	int i = vsprintf(buffer, format, args);
+
+	// enviar el buffer
+
+	va_end(args);
+	return i;
 }

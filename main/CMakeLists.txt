@@ -1,2 +1,2 @@
-idf_component_register(SRCS "example_spp_acceptor_demo.c" classicBtSpp.c
+idf_component_register(SRCS "main_demo.c" "classicBtSpp.c"
                     INCLUDE_DIRS ".")

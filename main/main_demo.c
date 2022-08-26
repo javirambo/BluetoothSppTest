@@ -17,11 +17,20 @@
 
 static const char *SPP_TAG = "DEMO";
 
+void CelularVinculado(char *nombre)
+{
+	// enviar al dashboard o loguear.....
+
+	ESP_LOGI(SPP_TAG, "Se ha vinculado el dispositivo: %s", nombre);
+}
+
 void OnEachLine(char *line)
 {
 	// hacer algo con los datos.......parse de JSON o comandos AT
 
 	ESP_LOGI(SPP_TAG, "%s", line);
+
+	btspp_printf("test - %s - %d - %f\n\r", "OK", 3, 4.5);
 }
 
 void app_main(void)
@@ -29,5 +38,6 @@ void app_main(void)
 	// abre una especie de servidor BT para aceptar clientes que se conecten con una terminal serie virtual.
 	// se llama al callback por cada linea que ingresa (terminada en \n\r).
 
-	startClassicBtSpp(OnEachLine);
+	// (password, callback)
+	btspp_init("Notengoidea", OnEachLine, CelularVinculado);
 }

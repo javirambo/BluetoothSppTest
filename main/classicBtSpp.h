@@ -8,11 +8,9 @@
 #ifndef MAIN_CLASSICBTSPP_H_
 #define MAIN_CLASSICBTSPP_H_
 
-#define BT_PASSWORD "Notengoidea"
-#define BT_PASSWORD_LEN 11
+typedef void (*BtStringCallback_t)(char *line);
 
-typedef void (*onEachLineCallback_t)(char *line);
-
-void startClassicBtSpp(onEachLineCallback_t onLineCallback);
+void btspp_init(const char * password, BtStringCallback_t onLineCallback, BtStringCallback_t onDeviceAuth);
+int btspp_printf(const char *format, ...);
 
 #endif /* MAIN_CLASSICBTSPP_H_ */
