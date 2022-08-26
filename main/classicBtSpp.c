@@ -23,7 +23,7 @@
 static const char *SPP_TAG = "BT_SPP";
 
 bool passwordIngresada = false;
-char myDeviceName[] = "EffiCast XXXXX";
+char myDeviceName[] = "Device XXXXX";
 char appPassword[20];
 uint32_t tx_handle;
 BtStringCallback_t onEachLineCallback;
@@ -31,7 +31,7 @@ BtStringCallback_t onDeviceAuthenticated;
 
 static void GetDeviceName()
 {
-	char *p = myDeviceName + 9;
+	char *p = myDeviceName + 7;
 	uint32_t tmp;
 	uint8_t mac[7];
 	esp_efuse_mac_get_default(mac);
